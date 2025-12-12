@@ -173,12 +173,8 @@ int8_t hash_map_put(hash_map_t *map, char *key, void *data)
     e->data = data;
 
     if (queue_push(map->queue, e) < 0) {
-        free(key);
-        key = NULL;
-        if (e->data != NULL) {
-            free(e->data);
-            e->data = NULL;
-        }
+        // Only free what we allocated (the hash_element_t structure)
+        // The caller owns key and data, so they're responsible for cleanup
         free(e);
         return -1;
     }
