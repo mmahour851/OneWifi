@@ -4238,31 +4238,40 @@ webconfig_error_t decode_blaster_object(const cJSON *blaster_cfg, active_msmt_t 
 
     decode_param_array(blaster_cfg, "Step", obj_array);
     length = cJSON_GetArraySize(obj_array);
-
+    wifi_util_dbg_print(WIFI_WEBCONFIG," String Overflow Fix\n");
     for (i = 0; i < length; i++) {
         stepobj = cJSON_GetArrayItem(obj_array, i);
         decode_param_integer(stepobj, "StepId", param);
         blaster_info->Step[i].StepId = param->valuedouble;
 
         decode_param_blaster_mac(stepobj, "SrcMac", param);
-        strcpy((char *)blaster_info->Step[i].SrcMac, param->valuestring);
-
+        snprintf((char *)blaster_info->Step[i].SrcMac,
+        sizeof(blaster_info->Step[i].SrcMac),
+        "%s", param->valuestring);
+        
         decode_param_blaster_mac(stepobj, "DestMac", param);
-        strcpy((char *)blaster_info->Step[i].DestMac, param->valuestring);
+        snprintf((char *)blaster_info->Step[i].DestMac,
+                sizeof(blaster_info->Step[i].DestMac),
+                "%s", param->valuestring);
     }
 
     decode_param_integer(blaster_cfg, "Status", param);
     blaster_info->Status = param->valuedouble;
 
     decode_param_blaster_mqtt_topic(blaster_cfg, "MQTT Topic", param);
-    strcpy((char *)blaster_info->blaster_mqtt_topic, param->valuestring);
+    snprintf((char *)blaster_info->blaster_mqtt_topic,
+            sizeof(blaster_info->blaster_mqtt_topic),
+            "%s", param->valuestring);
+
 
     decode_param_blaster_trace_info(blaster_cfg, "traceParent", param);
-    strcpy((char *)blaster_info->t_header.traceParent, param->valuestring);
-
+    snprintf((char *)blaster_info->t_header.traceParent,
+            sizeof(blaster_info->t_header.traceParent),
+            "%s", param->valuestring);
     decode_param_blaster_trace_info(blaster_cfg, "traceState", param);
-    strcpy((char *)blaster_info->t_header.traceState, param->valuestring);
-
+    snprintf((char *)blaster_info->t_header.traceState,
+            sizeof(blaster_info->t_header.traceState),
+            "%s", param->valuestring);
     return webconfig_error_none;
 }
 
