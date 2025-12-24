@@ -802,7 +802,7 @@ webconfig_error_t decode_interworking_common_object(const cJSON *interworking, w
     interworking_info->interworking.hessOptionPresent = (param->type & cJSON_True) ? true:false;
 
     decode_param_string(interworking, "HESSID", param);
-    strcpy(interworking_info->interworking.hessid, param->valuestring);
+    snprintf(interworking_info->interworking.hessid, sizeof(interworking_info->interworking.hessid), "%s", param->valuestring);
     if (WiFi_IsValidMacAddr(interworking_info->interworking.hessid) != TRUE) {
         wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: Validation failed for HESSID\n", __func__, __LINE__);
         //strncpy(execRetVal->ErrorMsg, "Invalid HESSID",sizeof(execRetVal->ErrorMsg)-1);
@@ -1138,7 +1138,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: open_radius_object RadiusServerIPAddr is NULL \n", __func__, __LINE__);
             strcpy(temp_ip,"0.0.0.0");
         } else {
-            strcpy(temp_ip,param->valuestring);
+            snprintf(temp_ip, sizeof(temp_ip), "%s", param->valuestring);
         }
         if (decode_ipv4_address(temp_ip) == webconfig_error_none || decode_ipv6_address(temp_ip) == webconfig_error_none) {
 #ifndef WIFI_HAL_VERSION_3_PHASE2
@@ -1173,7 +1173,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
 
     if (object != NULL) {
         decode_param_allow_empty_string(radius, "RadiusSecret", param);
-        strcpy(radius_info->key, param->valuestring);
+        snprintf(radius_info->key, sizeof(radius_info->key), "%s", param->valuestring);
     }
     object = cJSON_GetObjectItem(radius, "SecondaryRadiusServerIPAddr");
 
@@ -1183,7 +1183,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: In open_radius SecondaryRadiusServerIPAddr is NULL\n", __func__, __LINE__);
             strcpy(temp_ip,"0.0.0.0");
         } else {
-            strcpy(temp_ip,param->valuestring);
+            snprintf(temp_ip, sizeof(temp_ip), "%s", param->valuestring);
         }
         if (decode_ipv4_address(temp_ip) == webconfig_error_none || decode_ipv6_address(temp_ip) == webconfig_error_none) {
 #ifndef WIFI_HAL_VERSION_3_PHASE2
@@ -1218,7 +1218,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
 
     if (object != NULL) {
         decode_param_allow_empty_string(radius, "SecondaryRadiusSecret", param);
-        strcpy(radius_info->s_key, param->valuestring);
+        snprintf(radius_info->s_key, sizeof(radius_info->s_key), "%s", param->valuestring);
     }
 
     object = cJSON_GetObjectItem(radius, "DasServerIPAddr");
@@ -1229,7 +1229,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: In open_radius DasServerIPAddr is NULL\n", __func__, __LINE__);
             strcpy(temp_ip,"0.0.0.0");
         } else {
-            strcpy(temp_ip,param->valuestring);
+            snprintf(temp_ip, sizeof(temp_ip), "%s", param->valuestring);
         }
         if (inet_pton(AF_INET, temp_ip, &(radius_info->dasip.u.IPv4addr)) > 0) {
             radius_info->dasip.family = wifi_ip_family_ipv4;
@@ -1253,7 +1253,7 @@ webconfig_error_t decode_open_radius_object(const cJSON *radius, wifi_radius_set
 
     if (object != NULL) {
         decode_param_allow_empty_string(radius, "DasSecret", param);
-        strcpy(radius_info->daskey, param->valuestring);
+        snprintf(radius_info->daskey, sizeof(radius_info->daskey), "%s", param->valuestring);
     }
 
     object = cJSON_GetObjectItem(radius, "MaxAuthAttempts");
@@ -2233,7 +2233,7 @@ webconfig_error_t decode_mesh_sta_object(const cJSON *vap, wifi_vap_info_t *vap_
     int band = -1;
     //VAP Name
     decode_param_string(vap, "VapName", param);
-    strcpy(vap_info->vap_name, param->valuestring);
+    snprintf( vap_info->vap_name, sizeof(vap_info->vap_name), "%s", param->valuestring);
 
     vap_info->vap_index = convert_vap_name_to_index(wifi_prop, vap_info->vap_name);
     if ((int)vap_info->vap_index < 0) {
@@ -2263,7 +2263,7 @@ webconfig_error_t decode_mesh_sta_object(const cJSON *vap, wifi_vap_info_t *vap_
 
     // SSID
     decode_param_allow_empty_string(vap, "SSID", param);
-    strcpy(vap_info->u.sta_info.ssid, param->valuestring);
+    snprintf(vap_info->u.sta_info.ssid, sizeof(vap_info->u.sta_info.ssid), "%s", param->valuestring);
 
     // BSSID
     decode_param_string(vap, "BSSID", param);
@@ -3278,16 +3278,16 @@ webconfig_error_t decode_device_info(const cJSON *device_cfg, wifi_platform_prop
     const cJSON  *param;
 
     decode_param_string(device_cfg, "Manufacturer", param);
-    strcpy(info->manufacturer, param->valuestring);
+    snprintf(info->manufacturer, sizeof(info->manufacturer), "%s", param->valuestring);
 
     decode_param_string(device_cfg, "Model", param);
-    strcpy(info->manufacturerModel, param->valuestring);
+    snprintf(info->manufacturerModel, sizeof(info->manufacturerModel), "%s", param->valuestring);
 
     decode_param_string(device_cfg, "SerialNo", param);
-    strcpy(info->serialNo, param->valuestring);
+    snprintf(info->serialNo, sizeof(info->serialNo), "%s", param->valuestring);
 
     decode_param_string(device_cfg, "Software_version", param);
-    strcpy(info->software_version, param->valuestring);
+    snprintf(info->software_version, sizeof(info->software_version), "%s", param->valuestring);
 
     decode_param_string(device_cfg, "CMMAC", param);
     str_to_mac_bytes(param->valuestring,info->cm_mac);
@@ -4091,7 +4091,7 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             return webconfig_error_decode;
         }
 
-        strcpy((char *)postassoc_info->rssi_up_threshold, param->valuestring);
+        snprintf((char *)postassoc_info->rssi_up_threshold, sizeof(postassoc_info->rssi_up_threshold), "%s", param->valuestring);
     }
 
     // SamplingInterval
@@ -4113,7 +4113,7 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             return webconfig_error_decode;
         }
 
-        strcpy((char *)postassoc_info->sampling_interval, param->valuestring);
+        snprintf((char *)postassoc_info->sampling_interval, sizeof(postassoc_info->sampling_interval), "%s", param->valuestring);
     }
 
     // SnrThreshold
@@ -4135,7 +4135,7 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             return webconfig_error_decode;
         }
 
-        strcpy((char *)postassoc_info->snr_threshold, param->valuestring);
+        snprintf((char *)postassoc_info->snr_threshold, sizeof(postassoc_info->snr_threshold), "%s", param->valuestring);
     }
 
     // SamplingCount
@@ -4157,7 +4157,7 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             return webconfig_error_decode;
         }
 
-        strcpy((char *)postassoc_info->sampling_count, param->valuestring);
+        snprintf((char *)postassoc_info->sampling_count, sizeof(postassoc_info->sampling_count), "%s", param->valuestring);
     }
 
      // CuThreshold
@@ -4179,7 +4179,7 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             return webconfig_error_decode;
         }
 
-        strcpy((char *)postassoc_info->cu_threshold, param->valuestring);
+        snprintf((char *)postassoc_info->cu_threshold, sizeof(postassoc_info->cu_threshold), "%s", param->valuestring);
     }
 
     return webconfig_error_none;
@@ -4282,7 +4282,7 @@ webconfig_error_t decode_harvester_object(const cJSON *obj, instant_measurement_
     decode_param_bool(obj, "Enabled", param);
     harvester->b_inst_client_enabled = (param->type & cJSON_True) ? true:false;
     decode_param_string(obj, "MacAddress", param);
-    strcpy(harvester->mac_address, param->valuestring);
+    snprintf(harvester->mac_address, sizeof(harvester->mac_address), "%s", param->valuestring);
     decode_param_integer(obj, "ReportingPeriod", param);
     harvester->u_inst_client_reporting_period = param->valuedouble;
     decode_param_integer(obj, "DefReportingPeriod", param);

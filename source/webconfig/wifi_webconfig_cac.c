@@ -180,7 +180,7 @@ webconfig_error_t decode_cac_config_subdoc(webconfig_t *config, webconfig_subdoc
         rdk_vap_info = &params->radios[radio_index].vaps.rdk_vap_array[vap_array_index];
         rdk_vap_info->vap_index = convert_vap_name_to_index(wifi_prop, name);
         vap_info = &params->radios[radio_index].vaps.vap_map.vap_array[vap_array_index];
-        strcpy(vap_info->vap_name, name);
+        snprintf(vap_info->vap_name, sizeof(vap_info->vap_name), "%s", name);
 
         if ((int)rdk_vap_info->vap_index < 0) {
             wifi_util_error_print(WIFI_WEBCONFIG, "%s:%d: Invalid  vap_index\n", __func__, __LINE__);
