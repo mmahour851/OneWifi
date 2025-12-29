@@ -1585,7 +1585,7 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
 
     // VAP Name
     decode_param_string(vap, "VapName", param);
-    strcpy(vap_info->vap_name, param->valuestring);
+    snprinf(vap_info->vap_name, sizeof(vap_info->vap_name), "%s", param->valuestring);
 
     vap_info->vap_index = convert_vap_name_to_index(wifi_prop, vap_info->vap_name);
     if ((int)vap_info->vap_index < 0) {
@@ -1785,11 +1785,11 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
         vap_info->u.bss_info.wps.methods = param->valuedouble;
         // WpsConfigPin
         decode_param_allow_empty_string(vap, "WpsConfigPin", param);
-        strcpy(vap_info->u.bss_info.wps.pin, param->valuestring);
+        snprinf(vap_info->u.bss_info.wps.pin, sizeof(vap_info->u.bss_info.wps.pin), "%s", param->valuestring);
     }
     // BeaconRateCtl
     decode_param_string(vap, "BeaconRateCtl", param);
-    strcpy(vap_info->u.bss_info.beaconRateCtl, param->valuestring);
+    snprintf(vap_info->u.bss_info.beaconRateCtl, sizeof(vap_info->u.bss_info.beaconRateCtl), "%s", param->valuestring);
 
     // connected_building_enabled params
     decode_param_allow_empty_bool(vap, "Connected_building_enabled", param, connected_value);
@@ -2378,7 +2378,7 @@ webconfig_error_t decode_wifi_global_config(const cJSON *global_cfg, wifi_global
 #ifndef EASY_MESH_NODE
     // WpsPin
     decode_param_string(global_cfg, "WpsPin", param);
-    strcpy(global_info->wps_pin, param->valuestring);
+    snprintf(global_info->wps_pin, sizeof(global_info->wps_pin), "%s", param->valuestring);
 #endif
 
     // BandsteeringEnable
@@ -2477,7 +2477,7 @@ webconfig_error_t decode_wifi_global_config(const cJSON *global_cfg, wifi_global
 #ifndef EASY_MESH_NODE
     //WifiRegionCode
     decode_param_string(global_cfg, "WifiRegionCode", param);
-    strcpy(global_info->wifi_region_code, param->valuestring);
+    snprintf(global_info->wifi_region_code, sizeof(global_info->wifi_region_code), "%s", param->valuestring);
 
     // DiagnosticEnable
     decode_param_bool(global_cfg, "DiagnosticEnable", param);
@@ -2493,21 +2493,22 @@ webconfig_error_t decode_wifi_global_config(const cJSON *global_cfg, wifi_global
 
     //NormalizedRssiList
     decode_param_string(global_cfg, "NormalizedRssiList", param);
-    strncpy(global_info->normalized_rssi_list, param->valuestring, sizeof(global_info->normalized_rssi_list));
+    snprintf(global_info->normalized_rssi_list, sizeof(global_info->normalized_rssi_list), "%s", param->valuestring);
+
 
     //SNRList
     decode_param_string(global_cfg, "SNRList", param);
-    strncpy(global_info->snr_list, param->valuestring, sizeof(global_info->snr_list));
+    snprintf(global_info->snr_list, sizeof(global_info->snr_list), "%s", param->valuestring);
 
 
     //CliStatList
     decode_param_string(global_cfg, "CliStatList", param);
-    strncpy(global_info->cli_stat_list, param->valuestring, sizeof(global_info->cli_stat_list));
+    snprintf(global_info->cli_stat_list, sizeof(global_info->cli_stat_list), "%s", param->valuestring); 
 
 
     //TxRxRateList
     decode_param_string(global_cfg, "TxRxRateList", param);
-    strncpy(global_info->txrx_rate_list, param->valuestring, sizeof(global_info->txrx_rate_list));
+    snprintf(global_info->txrx_rate_list, sizeof(global_info->txrx_rate_list), "%s", param->valuestring);
 #endif
 
     wifi_util_dbg_print(WIFI_WEBCONFIG,"wifi global Parameters decode successfully\n");
@@ -2692,7 +2693,7 @@ webconfig_error_t decode_radio_setup_object(const cJSON *obj_radio_setup, rdk_wi
         // VapName
         memset(vap_map->rdk_vap_array[i].vap_name, 0, sizeof(vap_map->rdk_vap_array[i].vap_name));
         decode_param_string(obj, "VapName", param);
-        strcpy((char *)vap_map->rdk_vap_array[i].vap_name, param->valuestring);
+        snprintf((char *)vap_map->rdk_vap_array[i].vap_name, sizeof(vap_map->rdk_vap_array[i].vap_name), "%s", param->valuestring);
 
         // VapIndex
         decode_param_integer(obj, "VapIndex", param);
@@ -2932,7 +2933,7 @@ webconfig_error_t decode_radio_object(const cJSON *obj_radio, rdk_wifi_radio_t *
 
     // RadioName
     decode_param_string(obj_radio, "RadioName", param);
-    strcpy(radio->name, param->valuestring);
+    snprintf(radio->name, sizeof(radio->name), "%s", param->valuestring);
 
     // FreqBand
     decode_param_integer(obj_radio, "FreqBand", param);
@@ -2999,7 +3000,7 @@ webconfig_error_t decode_radio_object(const cJSON *obj_radio, rdk_wifi_radio_t *
         param->valuedouble);
     if (ret != webconfig_error_none) {
         wifi_util_error_print(WIFI_WEBCONFIG,
-            "Invalid wifi radio channel configuration. channel %d %d\n", radio_info->channel,
+            "Invalid wifi radio channel configuration. channel %d %.0f\n", radio_info->channel,
             param->valuedouble);
         // strncpy(execRetVal->ErrorMsg, "Invalid wifi radio channel
         // config",sizeof(execRetVal->ErrorMsg)-1);
@@ -3061,7 +3062,7 @@ webconfig_error_t decode_radio_object(const cJSON *obj_radio, rdk_wifi_radio_t *
     decode_param_integer(obj_radio, "HwMode", param);
     if (validate_wifi_hw_variant(radio_info->band, param->valuedouble) != RETURN_OK) {
         wifi_util_error_print(WIFI_WEBCONFIG,
-            "Invalid wifi radio hardware mode [%d] configuration\n", param->valuedouble);
+            "Invalid wifi radio hardware mode [%.0f] configuration\n", param->valuedouble);
         // strncpy(execRetVal->ErrorMsg, "Invalid wifi radio hardware mode
         // config",sizeof(execRetVal->ErrorMsg)-1);
         return webconfig_error_decode;
@@ -3878,16 +3879,16 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: -90 to -50\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: -90 to -50\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val > -50 || val < -95) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
-        strcpy((char *)preassoc_info->rssi_up_threshold, param->valuestring);
+        snprintf((char *)preassoc_info->rssi_up_threshold, sizeof(preassoc_info->rssi_up_threshold), "%s", param->valuestring);
     }
 
     // SnrThreshold
@@ -3900,16 +3901,16 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 1 || val > 100) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
-        strcpy((char *)preassoc_info->snr_threshold, param->valuestring);
+        snprintf((char *)preassoc_info->snr_threshold, sizeof(preassoc_info->snr_threshold), "%s", param->valuestring);
     }
 
      // CuThreshold
@@ -3922,16 +3923,16 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 0 || val > 100) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
-        strcpy((char *)preassoc_info->cu_threshold, param->valuestring);
+        snprintf((char *)preassoc_info->cu_threshold, sizeof(preassoc_info), "%s", param->valuestring);
     }
 
     // basic_data_transmit_rate
@@ -3944,11 +3945,11 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
-        strcpy((char *)preassoc_info->basic_data_transmit_rates, param->valuestring);
+        snprinf((char *)preassoc_info->basic_data_transmit_rates, sizeof(preassoc_info->basic_data_transmit_rates), "%s", param->valuestring);
     }
 
      // operational_data_transmit_rate
@@ -3957,7 +3958,7 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
     if ((strcmp(param->valuestring, "disabled") == 0) || (strlen(param->valuestring) == 0)) {
         strcpy((char *)preassoc_info->operational_data_transmit_rates, "disabled");
     } else {
-        strcpy((char *)preassoc_info->operational_data_transmit_rates, param->valuestring);
+        snprintf((char *)preassoc_info->operational_data_transmit_rates, sizeof(preassoc_info->operational_data_transmit_rates), "%s", param->valuestring);
     }
 
      // supported_data_transmit_rate
@@ -3966,7 +3967,7 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
     if ((strcmp(param->valuestring, "disabled") == 0) || (strlen(param->valuestring) == 0)) {
         strcpy((char *)preassoc_info->supported_data_transmit_rates, "disabled");
     } else {
-        strcpy((char *)preassoc_info->supported_data_transmit_rates, param->valuestring);
+        snprintf((char *)preassoc_info->supported_data_transmit_rates, sizeof(preassoc_info->supported_data_transmit_rates), "%s", param->valuestring);
     }
 
      // minimum_advertised_mcs
@@ -3986,7 +3987,7 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
           wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect value, value should be withing 0 to 7\n", __FUNCTION__,__LINE__);
           return webconfig_error_decode;
         }
-        strcpy((char *)preassoc_info->minimum_advertised_mcs, param->valuestring);
+        snprintf((char *)preassoc_info->minimum_advertised_mcs, sizeof(preassoc_info->minimum_advertised_mcs), "%s", param->valuestring);
     }
 
      //6GOpInfoMinRate
@@ -3996,7 +3997,7 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
         if ((strcmp(param->valuestring, "disabled") == 0) || (strlen(param->valuestring) == 0)) {
             strcpy((char *)preassoc_info->sixGOpInfoMinRate, "disabled");
         } else {
-            strcpy((char *)preassoc_info->sixGOpInfoMinRate, param->valuestring);
+            snprintf((char *)preassoc_info->sixGOpInfoMinRate, sizeof(preassoc_info->sixGOpInfoMinRate), "%s", param->valuestring);
         }
    }
    else {
@@ -4082,12 +4083,12 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val > -50 || val < -95) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
@@ -4104,12 +4105,12 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 1 || val > 10) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d  Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
@@ -4126,12 +4127,12 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 1 || val > 100) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
@@ -4148,12 +4149,12 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 1 || val > 10) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
@@ -4170,12 +4171,12 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Incorrect format. Example: 10 to 100\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
         if (val < 10 || val > 100) {
-            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d %s Value is out of supported range\n", __FUNCTION__,__LINE__);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d Value is out of supported range\n", __FUNCTION__,__LINE__);
             return webconfig_error_decode;
         }
 
@@ -4690,7 +4691,7 @@ webconfig_error_t decode_steering_config_object(hash_map_t **steer_map, cJSON *s
                 return webconfig_error_decode;
             }
             decode_param_string(vap_name_obj, "VapName", param);
-            strcpy((char *)temp_st_cfg.vap_name_list[vap_name_list_count], param->valuestring);
+            snprinf((char *)temp_st_cfg.vap_name_list[vap_name_list_count], sizeof(temp_st_cfg.vap_name_list[vap_name_list_count]), "%s", param->valuestring);
             vap_name_list_count++;
         }
         temp_st_cfg.vap_name_list_len = vap_name_list_count;
@@ -4798,7 +4799,7 @@ webconfig_error_t decode_steering_clients_object(hash_map_t **steering_client_ma
 
         memset(&temp_st_cfg, 0, sizeof(band_steering_clients_t));
         decode_param_string(st_obj, "Mac", param);
-        strcpy((char *)temp_st_cfg.mac, param->valuestring);
+        snprinf((char *)temp_st_cfg.mac, sizeof(temp_st_cfg.mac), "%s", param->valuestring);
         decode_param_integer(st_obj, "BackoffExpBase", param);
         temp_st_cfg.backoff_exp_base = param->valuedouble;
         decode_param_integer(st_obj, "BackoffSecs", param);
@@ -4867,9 +4868,9 @@ webconfig_error_t decode_steering_clients_object(hash_map_t **steering_client_ma
                 return webconfig_error_decode;
             }
             decode_param_string(param_obj, "Key", param);
-            strcpy((char *)temp_st_cfg.cs_params[j].key, param->valuestring);
+            snprinf((char *)temp_st_cfg.cs_params[j].key, sizeof(temp_st_cfg.cs_params[j].key), "%s", param->valuestring);
             decode_param_string(param_obj, "Value", param);
-            strcpy((char *)temp_st_cfg.cs_params[j].value, param->valuestring);
+            snprinf((char *)temp_st_cfg.cs_params[j].value, sizeof(temp_st_cfg.cs_params[j].value), "%s", param->valuestring);
         }
         temp_st_cfg.cs_params_len = j;
 
@@ -4888,9 +4889,9 @@ webconfig_error_t decode_steering_clients_object(hash_map_t **steering_client_ma
                 return webconfig_error_decode;
             }
             decode_param_string(param_obj, "Key", param);
-            strcpy((char *)temp_st_cfg.steering_btm_params[j].key, param->valuestring);
+            snprinf((char *)temp_st_cfg.steering_btm_params[j].key, sizeof(temp_st_cfg.steering_btm_params[j].key), "%s", param->valuestring);
             decode_param_string(param_obj, "Value", param);
-            strcpy((char *)temp_st_cfg.steering_btm_params[j].value, param->valuestring);
+            snprinf((char *)temp_st_cfg.steering_btm_params[j].value, sizeof(temp_st_cfg.steering_btm_params[j].value), "%s", param->valuestring);
         }
         temp_st_cfg.steering_btm_params_len = j;
 
@@ -4909,9 +4910,9 @@ webconfig_error_t decode_steering_clients_object(hash_map_t **steering_client_ma
                 return webconfig_error_decode;
             }
             decode_param_string(param_obj, "Key", param);
-            strcpy((char *)temp_st_cfg.rrm_bcn_rpt_params[j].key, param->valuestring);
+            snprinf((char *)temp_st_cfg.rrm_bcn_rpt_params[j].key, sizeof(temp_st_cfg.rrm_bcn_rpt_params[j].key), "%s", param->valuestring);
             decode_param_string(param_obj, "Value", param);
-            strcpy((char *)temp_st_cfg.rrm_bcn_rpt_params[j].value, param->valuestring);
+            snprinf((char *)temp_st_cfg.rrm_bcn_rpt_params[j].value, sizeof(temp_st_cfg.rrm_bcn_rpt_params[j].value), "%s", param->valuestring);
         }
         temp_st_cfg.rrm_bcn_rpt_params_len = j;
 
@@ -4930,9 +4931,9 @@ webconfig_error_t decode_steering_clients_object(hash_map_t **steering_client_ma
                 return webconfig_error_decode;
             }
             decode_param_string(param_obj, "Key", param);
-            strcpy((char *)temp_st_cfg.sc_btm_params[j].key, param->valuestring);
+            snprinf((char *)temp_st_cfg.sc_btm_params[j].key, sizeof(temp_st_cfg.sc_btm_params[j].key), "%s", param->valuestring);
             decode_param_string(param_obj, "Value", param);
-            strcpy((char *)temp_st_cfg.sc_btm_params[j].value, param->valuestring);
+            snprinf((char *)temp_st_cfg.sc_btm_params[j].value, sizeof(temp_st_cfg.sc_btm_params[j].value), "%s",param->valuestring);
         }
         temp_st_cfg.sc_btm_params_len = j;
 
@@ -4997,9 +4998,9 @@ webconfig_error_t decode_vif_neighbors_object(hash_map_t **neighbors_map, cJSON 
         cJSON *param;
 
         decode_param_string(neighbors_obj, "Bssid", param);
-        strcpy((char *)temp_neighbors_cfg.bssid, param->valuestring);
+        snprinf((char *)temp_neighbors_cfg.bssid, sizeof(temp_neighbors_cfg.bssid), "%s", param->valuestring);
         decode_param_string(neighbors_obj, "IfName", param);
-        strcpy((char *)temp_neighbors_cfg.if_name, param->valuestring);
+        snprintf((char *)temp_neighbors_cfg.if_name, sizeof(temp_neighbors_cfg.if_name), "%s", param->valuestring);
         decode_param_integer(neighbors_obj, "Channel", param);
         temp_neighbors_cfg.channel = param->valuedouble;
         decode_param_integer(neighbors_obj, "HTMode", param);
