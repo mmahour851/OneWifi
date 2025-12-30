@@ -1435,7 +1435,7 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
             if (false ==
                 rbusValue_SetFromString(value, RBUS_STRING, (char *)input_data->raw_data.bytes)) {
                 wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid value '%s' for the parameter %s\n\r",
-                    __func__, input_data->raw_data.bytes, paramName);
+                    __func__, input_data->raw_data.bytes ? (char *)input_data->raw_data.bytes : "NULL", paramName ? (char *)paramName : "NULL");
             }
         } else if (input_data->data_type == bus_data_type_bytes) {
               rbusValue_SetBytes(value, (uint8_t *)input_data->raw_data.bytes, input_data->raw_data_len);
@@ -1443,7 +1443,7 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
               rbusValue_SetInt32(value, input_data->raw_data.i32);
         } else {
               wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid data_type '%d' for the parameter %s\n\r",
-                __func__, input_data->data_type, paramName);
+                __func__, input_data->data_type, paramName ? (char *)paramName : "NULL");
         }
     }
 
