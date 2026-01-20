@@ -3892,7 +3892,11 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
             "EXIT 2: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
-
+        size_t dst_size = sizeof(preassoc_info->rssi_up_threshold);
+        size_t src_size = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size, src_size );
+        
         snprintf((char *)preassoc_info->rssi_up_threshold, sizeof(preassoc_info->rssi_up_threshold), "%s", param->valuestring);
     }
 
@@ -3901,8 +3905,16 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
 
     if ((strcmp(param->valuestring, "disabled") == 0) || (strlen(param->valuestring) == 0)) {
         strcpy((char *)preassoc_info->snr_threshold, "disabled");
+        size_t dst_size = sizeof(preassoc_info->snr_threshold);
+        size_t src_size = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE IF, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size, src_size );
     } else {
         ret = sscanf(param->valuestring, "%d", &val);
+        size_t dst_size2 = sizeof(preassoc_info->snr_threshold);
+        size_t src_size2 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size2, src_size2 );
 
         /*String should be in format of range between two integers*/
         if (ret != 1) {
@@ -3918,6 +3930,10 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
             "EXIT 4: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size3 = sizeof(preassoc_info->snr_threshold);
+        size_t src_size3 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size3, src_size3 );
 
         snprintf((char *)preassoc_info->snr_threshold, sizeof(preassoc_info->snr_threshold), "%s", param->valuestring);
     }
@@ -3944,6 +3960,10 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
             "EXIT 6: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size4 = sizeof(preassoc_info->cu_threshold);
+        size_t src_size4 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size4, src_size4 );
 
         snprintf((char *)preassoc_info->cu_threshold, sizeof(preassoc_info->cu_threshold), "%s", param->valuestring);
     }
@@ -3963,8 +3983,12 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
             "EXIT 7: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size5 = sizeof(preassoc_info->basic_data_transmit_rates);
+        size_t src_size5 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size5, src_size5 );
 
-        snprinf((char *)preassoc_info->basic_data_transmit_rates, sizeof(preassoc_info->basic_data_transmit_rates), "%s", param->valuestring);
+        snprintf((char *)preassoc_info->basic_data_transmit_rates, sizeof(preassoc_info->basic_data_transmit_rates), "%s", param->valuestring);
     }
 
      // operational_data_transmit_rate
@@ -4006,6 +4030,10 @@ webconfig_error_t decode_preassoc_cac_object(const cJSON *preassoc, wifi_preasso
             "EXIT 9: %s:%d:\n", __func__, __LINE__);
           return webconfig_error_decode;
         }
+        size_t dst_size6 = sizeof(preassoc_info->minimum_advertised_mcs);
+        size_t src_size6 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size6, src_size6 );
         snprintf((char *)preassoc_info->minimum_advertised_mcs, sizeof(preassoc_info->minimum_advertised_mcs), "%s", param->valuestring);
     }
 
@@ -4117,6 +4145,10 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             "EXIT 2: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size5 = sizeof(postassoc_info->rssi_up_threshold);
+        size_t src_size5 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size5, src_size5 );
 
         snprintf((char *)postassoc_info->rssi_up_threshold, sizeof(postassoc_info->rssi_up_threshold), "%s", param->valuestring);
     }
@@ -4143,6 +4175,10 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             "EXIT 4: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size4 = sizeof(postassoc_info->sampling_interval);
+        size_t src_size4 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size4, src_size4 );
 
         snprintf((char *)postassoc_info->sampling_interval, sizeof(postassoc_info->sampling_interval), "%s", param->valuestring);
     }
@@ -4169,6 +4205,10 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             "EXIT 6: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size3 = sizeof(postassoc_info->snr_threshold);
+        size_t src_size3 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size3, src_size3 );
 
         snprintf((char *)postassoc_info->snr_threshold, sizeof(postassoc_info->snr_threshold), "%s", param->valuestring);
     }
@@ -4195,6 +4235,10 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             "EXIT 8: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size2 = sizeof(postassoc_info->sampling_count);
+        size_t src_size2 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size2, src_size2 );
 
         snprintf((char *)postassoc_info->sampling_count, sizeof(postassoc_info->sampling_count), "%s", param->valuestring);
     }
@@ -4221,6 +4265,10 @@ webconfig_error_t decode_postassoc_cac_object(const cJSON *postassoc, wifi_posta
             "EXIT 10: %s:%d:\n", __func__, __LINE__);
             return webconfig_error_decode;
         }
+        size_t dst_size1 = sizeof(postassoc_info->cu_threshold);
+        size_t src_size1 = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE ELSE, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size1, src_size1 );
 
         snprintf((char *)postassoc_info->cu_threshold, sizeof(postassoc_info->cu_threshold), "%s", param->valuestring);
     }
