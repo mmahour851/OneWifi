@@ -1577,6 +1577,8 @@ webconfig_error_t decode_operating_environment(wifi_operating_env_t *operating_e
 webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *vap_info,
     rdk_wifi_vap_info_t *rdk_vap_info, wifi_platform_property_t *wifi_prop)
 {
+    wifi_util_dbg_print( WIFI_WEBCONFIG, "ENTRY TO : %s:%d \n",
+            __FUNCTION__, __LINE__ );
     const cJSON *param;
     cJSON *object = NULL;
     bool connected_value = false;
@@ -1585,12 +1587,18 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
 
     // VAP Name
     decode_param_string(vap, "VapName", param);
-    strcpy(vap_info->vap_name, param->valuestring);
+    size_t dst_size = sizeof(vap_info->vap_name);
+    size_t src_size = strlen(param->valuestring);
+    wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d dst_size=%zu src_size=%zu\n",
+         __FUNCTION__, __LINE__, dst_size, src_size );
+    snprintf(vap_info->vap_name, sizeof(vap_info->vap_name), "%s", param->valuestring);
 
     vap_info->vap_index = convert_vap_name_to_index(wifi_prop, vap_info->vap_name);
     if ((int)vap_info->vap_index < 0) {
         wifi_util_error_print(WIFI_WEBCONFIG, "%s %d :Invalid vapname %s\n", __FUNCTION__, __LINE__,
             vap_info->vap_name);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "EXIT 1 : %s:%d \n",
+            __FUNCTION__, __LINE__ );
         return webconfig_error_decode;
     }
     // Radio Index
@@ -1629,6 +1637,8 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
     if (decode_ssid_name(param->valuestring, vap_info->vap_mode) != webconfig_error_none) {
         wifi_util_error_print(WIFI_WEBCONFIG, "%s %d : Ssid name validation failed for %s\n",
             __FUNCTION__, __LINE__, vap_info->vap_name);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "EXIT 2 : %s:%d \n",
+            __FUNCTION__, __LINE__ );
         return webconfig_error_decode;
     }
     strncpy(vap_info->u.bss_info.ssid, param->valuestring, sizeof(vap_info->u.bss_info.ssid) - 1);
@@ -1747,6 +1757,8 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
             vap_info->u.bss_info.mac_filter_mode);
         // strncpy(execRetVal->ErrorMsg, "Invalid wifi vap mac filter mode:
         // 0..1",sizeof(execRetVal->ErrorMsg)-1);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "EXIT 3 : %s:%d \n",
+            __FUNCTION__, __LINE__ );
         return webconfig_error_decode;
     }
     // WmmEnabled
@@ -1785,11 +1797,19 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
         vap_info->u.bss_info.wps.methods = param->valuedouble;
         // WpsConfigPin
         decode_param_allow_empty_string(vap, "WpsConfigPin", param);
-        strcpy(vap_info->u.bss_info.wps.pin, param->valuestring);
+        size_t dst_size = sizeof(vap_info->u.bss_info.wps.pin);
+        size_t src_size = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE IF, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size, src_size );
+        snprintf(vap_info->u.bss_info.wps.pin, sizeof(vap_info->u.bss_info.wps.pin), "%s", param->valuestring);
     }
     // BeaconRateCtl
     decode_param_string(vap, "BeaconRateCtl", param);
-    strcpy(vap_info->u.bss_info.beaconRateCtl, param->valuestring);
+    size_t dst_size = sizeof(vap_info->u.bss_info.beaconRateCtl);
+    size_t src_size = strlen(param->valuestring);
+        wifi_util_dbg_print( WIFI_WEBCONFIG, "%s:%d INSIDE IF, dst_size=%zu src_size=%zu\n",
+            __FUNCTION__, __LINE__, dst_size, src_size );
+    snprintf(vap_info->u.bss_info.beaconRateCtl, sizeof(vap_info->u.bss_info.beaconRateCtl), "%s", param->valuestring);
 
     // connected_building_enabled params
     decode_param_allow_empty_bool(vap, "Connected_building_enabled", param, connected_value);
@@ -1830,6 +1850,8 @@ webconfig_error_t decode_vap_common_object(const cJSON *vap, wifi_vap_info_t *va
         }
         vap_info->u.bss_info.vendor_elements_len = i;
     }
+    wifi_util_dbg_print( WIFI_WEBCONFIG, "EXIT END : %s:%d \n",
+            __FUNCTION__, __LINE__ );
 
     return webconfig_error_none;
 }
