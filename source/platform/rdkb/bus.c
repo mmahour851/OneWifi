@@ -1459,35 +1459,82 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
     raw_data_t *input_data, raw_data_t *output_data, uint8_t input_bus_data)
 {
     rbusError_t rc;
-    rbusHandle_t p_rbus_handle = handle->u.rbus_handle;
+    rbusHandle_t p_rbus_handle;
     rbusValue_t value = NULL;
     rbusProperty_t prop = NULL;
     rbusObject_t inParams = NULL, outParams = NULL;
     int len = 0;
     void *ptr = NULL;
+    //rbusObject_Init(&inParams, NULL);
+    //rbusValue_Init(&value);
+    if(handle == NULL || paramName == NULL) {
+        wifi_util_error_print(WIFI_BUS, "%s %d Invalid input handle or param\n", __func__, __LINE__);
+        return bus_error_invalid_input;
+    }
+
+    if(((input_bus_data == BUS_METHOD_SET) || (input_bus_data == BUS_METHOD_SET_GET)) &&
+        (input_data == NULL)) {
+        wifi_util_error_print(WIFI_BUS, "%s %d Invalid input data for set method\n", __func__, __LINE__);
+        return bus_error_invalid_input;
+    }
+
+    if(((input_bus_data == BUS_METHOD_GET) || (input_bus_data == BUS_METHOD_SET_GET)) &&
+        (output_data == NULL)) {
+        wifi_util_error_print(WIFI_BUS, "%s %d Invalid output data for get method\n", __func__, __LINE__);
+        return bus_error_invalid_input;
+    }
+
+    p_rbus_handle = handle->u.rbus_handle;
     rbusObject_Init(&inParams, NULL);
     rbusValue_Init(&value);
 
     if ((input_bus_data == BUS_METHOD_SET) || (input_bus_data == BUS_METHOD_SET_GET)) {
+        bool value_set = false;
         if (input_data->data_type == bus_data_type_string) {
-            if (false ==
-                rbusValue_SetFromString(value, RBUS_STRING, (char *)input_data->raw_data.bytes)) {
-                wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid value '%s' for the parameter %s\n\r",
-                    __func__, input_data->raw_data.bytes, paramName);
+            if(input_data->raw_data.bytes != NULL) {
+                if (false ==
+                    rbusValue_SetFromString(value, RBUS_STRING, (char *)input_data->raw_data.bytes)) {
+                    wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid value '%s' for the parameter %s\n\r",
+                        __func__, (char *)input_data->raw_data.bytes, (char *)paramName);
+                }
+                else {
+                value_set = true;
+                }
             }
-        } else if (input_data->data_type == bus_data_type_bytes) {
-              rbusValue_SetBytes(value, (uint8_t *)input_data->raw_data.bytes, input_data->raw_data_len);
-        } else if (input_data->data_type == bus_data_type_int32) {
+            else {
+            wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid NULL string for the parameter %s\n\r",
+                __func__, (char *)paramName);
+            }
+        }
+        else if (input_data->data_type == bus_data_type_bytes) {
+                if(input_data->raw_data.bytes != NULL && input_data->raw_data_len > 0){
+                    rbusValue_SetBytes(value, (uint8_t *)input_data->raw_data.bytes, input_data->raw_data_len);
+                    value_set = true;
+                }
+                else {
+                    wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid NULL bytes for the parameter %s\n\r",
+                        __func__, (char *)paramName);
+                }
+            }
+        else if (input_data->data_type == bus_data_type_int32) {
               rbusValue_SetInt32(value, input_data->raw_data.i32);
-        } else {
+              value_set = true;
+        }
+        else {
               wifi_util_dbg_print(WIFI_BUS, "%s: bus: Invalid data_type '%d' for the parameter %s\n\r",
-                __func__, input_data->data_type, paramName);
+                __func__, input_data->data_type, (char *)paramName);
+        }
+        if(value_set) {
+            rbusProperty_Init(&prop, paramName, value);
+            rbusObject_SetProperty(inParams, prop);
+            rbusProperty_Release(prop);
+        }
+        else {
+            rbusObject_Release(inParams);
+            rbusValue_Release(value);
+            return bus_error_invalid_input;
         }
     }
-
-    rbusProperty_Init(&prop, paramName, value);
-    rbusObject_SetProperty(inParams, prop);
-    rbusProperty_Release(prop);
 
     rc = rbusMethod_Invoke(p_rbus_handle, event, inParams, &outParams);
     if (inParams) {
