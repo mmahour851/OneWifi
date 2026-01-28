@@ -1458,6 +1458,8 @@ bus_error_t bus_reg_data_elements(bus_handle_t *handle, bus_data_element_t *data
 bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event,
     raw_data_t *input_data, raw_data_t *output_data, uint8_t input_bus_data)
 {
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "ENTRY TO: %s:%d:\n", __func__, __LINE__);
     rbusError_t rc;
     rbusHandle_t p_rbus_handle;
     rbusValue_t value = NULL;
@@ -1469,18 +1471,24 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
     //rbusValue_Init(&value);
     if(handle == NULL || paramName == NULL) {
         wifi_util_error_print(WIFI_BUS, "%s %d Invalid input handle or param\n", __func__, __LINE__);
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 1: %s:%d:\n", __func__, __LINE__);
         return bus_error_invalid_input;
     }
 
     if(((input_bus_data == BUS_METHOD_SET) || (input_bus_data == BUS_METHOD_SET_GET)) &&
         (input_data == NULL)) {
         wifi_util_error_print(WIFI_BUS, "%s %d Invalid input data for set method\n", __func__, __LINE__);
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 2: %s:%d:\n", __func__, __LINE__);
         return bus_error_invalid_input;
     }
 
     if(((input_bus_data == BUS_METHOD_GET) || (input_bus_data == BUS_METHOD_SET_GET)) &&
         (output_data == NULL)) {
         wifi_util_error_print(WIFI_BUS, "%s %d Invalid output data for get method\n", __func__, __LINE__);
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 3: %s:%d:\n", __func__, __LINE__);
         return bus_error_invalid_input;
     }
 
@@ -1543,6 +1551,8 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
 
     if (outParams == NULL) {
         wifi_util_error_print(WIFI_BUS, "%s %d Out param is NULL\n", __func__, __LINE__);
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 4: %s:%d:\n", __func__, __LINE__);
 	return bus_error_general;
     }
 
@@ -1550,11 +1560,15 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
         prop = rbusObject_GetProperties(outParams);
         if (prop == NULL) {
             wifi_util_error_print(WIFI_BUS, "%s %d prop is NULL\n", __func__, __LINE__);
+            wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 5: %s:%d:\n", __func__, __LINE__);
 	    return bus_error_general;
         }
         value = rbusProperty_GetValue(prop);
         if (value == NULL) {
             wifi_util_error_print(WIFI_BUS, "%s %d value is NULL\n", __func__, __LINE__);
+            wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 6: %s:%d:\n", __func__, __LINE__);
 	    return bus_error_general;
         }
         switch (output_data->data_type) {
@@ -1595,11 +1609,15 @@ bus_error_t bus_method_invoke(bus_handle_t *handle, void *paramName, char *event
         if (output_data->raw_data.bytes == NULL) {
             wifi_util_error_print(WIFI_BUS, "%s:%d: bus: memory alloc is failed:%d for name:%s\n", 
 	        __func__, __LINE__, len, event);
+            wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 7: %s:%d:\n", __func__, __LINE__);
            return bus_error_out_of_resources;
         }
         memcpy(output_data->raw_data.bytes, ptr, len);
     }
     rbusValue_Release(value);
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT END: %s:%d:\n", __func__, __LINE__);
     return convert_rbus_to_bus_error_code(rc);
 }
 

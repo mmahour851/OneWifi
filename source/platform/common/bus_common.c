@@ -225,6 +225,8 @@ static bool is_grandparent_node_elem_is_table(elem_node_map_t* cur_parent)
 
 elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t* elem)
 {
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "ENTRY TO: %s:%d:\n", __func__, __LINE__);
     char* token                  = NULL;
     char* saveptr                = NULL;
     bus_name_string_t name;
@@ -236,6 +238,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
 
     if(current_node == NULL || elem == NULL)
     {
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 1: %s:%d:\n", __func__, __LINE__);
         return NULL;
     }
     BUS_MUX_LOCK(get_bus_mux_mutex());
@@ -277,6 +281,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
                     wifi_util_error_print(WIFI_BUS, "Failed to create child node [%s] for element [%s]\n",
                          token, elem->full_name);
                     BUS_MUX_UNLOCK(get_bus_mux_mutex());
+                    wifi_util_info_print(WIFI_WEBCONFIG,
+                        "EXIT 2: %s:%d:\n", __func__, __LINE__);
                     return NULL;
                 }
                 temp_node->parent = current_node;
@@ -324,6 +330,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
                         wifi_util_error_print(WIFI_BUS, "Failed to create sibling node [%s] for element [%s]\n",
                              token, elem->full_name);
                         BUS_MUX_UNLOCK(get_bus_mux_mutex());
+                        wifi_util_info_print(WIFI_WEBCONFIG,
+                            "EXIT 3: %s:%d:\n", __func__, __LINE__);
                         return NULL;
                     }
                     temp_node->parent = current_node->parent;
@@ -347,6 +355,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
     {
 
         BUS_MUX_UNLOCK(get_bus_mux_mutex());
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 4: %s:%d:\n", __func__, __LINE__);
         return NULL;
     }
 
@@ -357,6 +367,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
     {
         wifi_util_error_print(WIFI_BUS, "Failed to create node [%s]\n", elem->full_name);
         BUS_MUX_UNLOCK(get_bus_mux_mutex());
+        wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT 5: %s:%d:\n", __func__, __LINE__);
         return NULL;
     }
     memcpy(current_node->node_elem_data, elem->cfg_data, elem->cfg_data_len);
@@ -370,6 +382,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
             wifi_util_error_print(WIFI_BUS, "Failed to create node [%s]\n",
                  elem->full_name);
             BUS_MUX_UNLOCK(get_bus_mux_mutex());
+            wifi_util_info_print(WIFI_WEBCONFIG,
+                "EXIT 6: %s:%d:\n", __func__, __LINE__);
             return NULL;
         }
         rowTemplate->parent = current_node;
@@ -382,6 +396,8 @@ elem_node_map_t* bus_insert_elem_node(elem_node_map_t* root, bus_mux_data_elem_t
     }
 
     BUS_MUX_UNLOCK(get_bus_mux_mutex());
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT END: %s:%d:\n", __func__, __LINE__);
     return current_node;
 
 }
