@@ -1328,8 +1328,8 @@ webconfig_error_t translate_macfilter_from_rdk_vap_to_ovsdb_vif_config(const rdk
             memset(&mac_string,0,18);
             snprintf(mac_string, 18, "%02x:%02x:%02x:%02x:%02x:%02x", acl_entry->mac[0], acl_entry->mac[1],
                     acl_entry->mac[2], acl_entry->mac[3], acl_entry->mac[4], acl_entry->mac[5]);
-            if (row->mac_list[count] == NULL) {
-                wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: mac_list is NULL\n", __func__, __LINE__);
+            if (count >= ARRAY_SIZE(row->mac_list)) {
+                wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: mac_list index out of bounds\n", __func__, __LINE__);
                 return webconfig_error_translate_to_ovsdb;
             }
             snprintf(row->mac_list[count], sizeof(row->mac_list[count]), "%s", mac_string);
@@ -1358,8 +1358,8 @@ webconfig_error_t translate_macfilter_from_rdk_vap_to_ovsdb_vif_state(const rdk_
             memset(&mac_string,0,18);
             snprintf(mac_string, 18, "%02x:%02x:%02x:%02x:%02x:%02x", acl_entry->mac[0], acl_entry->mac[1],
                     acl_entry->mac[2], acl_entry->mac[3], acl_entry->mac[4], acl_entry->mac[5]);
-            if (row->mac_list[count] == NULL) {
-                wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: mac_list is NULL\n", __func__, __LINE__);
+            if (count >= ARRAY_SIZE(row->mac_list)) {
+                wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: mac_list index out of bounds\n", __func__, __LINE__);
                 return webconfig_error_translate_to_ovsdb;
             }
             snprintf(row->mac_list[count], sizeof(row->mac_list[count]), "%s", mac_string);
@@ -3881,13 +3881,18 @@ void remove_colon_from_mac(const char *mac_row, char *mac_wo_colon)
 
 webconfig_error_t translate_ovsdb_to_blaster_info_common(const struct schema_Wifi_Blaster_Config *blaster_row, const char *blaster_mqtt_topic, active_msmt_t *blaster_info)
 {
-    if ((blaster_row == NULL) || (blaster_info == NULL)) {
+    if ((blaster_row == NULL) || (blaster_info == NULL) || (blaster_mqtt_topic == NULL)) {
         wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: Input argument is NULL\n", __func__, __LINE__);
         return webconfig_error_translate_from_ovsdb;
     }
 
-    unsigned int mqtt_len = 0;
-    mqtt_len = strlen(blaster_mqtt_topic);
+    size_t mqtt_len = strnlen(blaster_mqtt_topic, MAX_MQTT_TOPIC_LEN);
+
+    if ((mqtt_len >= MAX_MQTT_TOPIC_LEN)) {
+    wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d Topic len is greater than expected(%u)\n", __func__, __LINE__, MAX_MQTT_TOPIC_LEN);
+         return webconfig_error_translate_from_ovsdb;
+    }
+
     memset(blaster_info, 0, sizeof(active_msmt_t));
     snprintf((char *)blaster_info->PlanId, sizeof(blaster_info->PlanId), "%s", blaster_row->plan_id);
 
@@ -3906,15 +3911,8 @@ webconfig_error_t translate_ovsdb_to_blaster_info_common(const struct schema_Wif
     blaster_info->ActiveMsmtEnable = true;
     blaster_info->Status = blaster_state_new;
 
-    if (blaster_mqtt_topic == NULL) {
-        wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d:MQTT topic is NULL\n", __func__, __LINE__);
-        return webconfig_error_translate_from_ovsdb;
-    }
-    else {
-        if ((mqtt_len > 0) && (mqtt_len <= MAX_MQTT_TOPIC_LEN)) {
-            snprintf((char *)blaster_info->blaster_mqtt_topic, mqtt_len, "%s", blaster_mqtt_topic);
-        }    
-    }
+    snprintf((char *)blaster_info->blaster_mqtt_topic, mqtt_len, "%s", blaster_mqtt_topic);
+
     return webconfig_error_none;
 }
 

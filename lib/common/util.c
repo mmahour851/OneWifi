@@ -143,6 +143,8 @@ char* strargv(char **cmd, bool with_quotes)
 
     quote_char = '\0';
 
+    LOG(INFO, "strargv: input cmd=%p, buf=\"%s\"", (void *)*cmd, *cmd);
+
     while (state != TOK_END && *scmd != '\0')
     {
         switch (state)
@@ -236,8 +238,11 @@ char* strargv(char **cmd, bool with_quotes)
                 *dcmd++ = *scmd++;
                 break;
 
-            case TOK_END:
+            default:
+                LOG(CRIT, "strargv: unexpected state=%d (cmd=%p, scmd_off=%td, dcmd_off=%td)", state,
+                    (void*)*cmd, scmd - *cmd, dcmd - *cmd);
                 break;
+
         }
     }
 
@@ -881,7 +886,11 @@ char *strexread(const char *prog, const char *const*argv)
             close(0);
             close(1);
             close(2);
-            open("/dev/null", O_RDONLY);
+            int devnull_fd = open("/dev/null", O_RDONLY);
+            if(devnull_fd < 0) {
+                LOGW("%s: failed to open /dev/null: %d (%s)", ctx, errno, strerror(errno));
+                return NULL;
+            }
             dup2(fd[1], 1);
             close(fd[0]);
             close(fd[1]);
