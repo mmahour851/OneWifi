@@ -123,6 +123,7 @@ int tsnprintf(char *str, size_t size, const char *fmt, ...)
  */
 char* strargv(char **cmd, bool with_quotes)
 {
+    LOG(INFO, "ENTRY TO: strargv");
     char *dcmd;
     char *scmd;
     char *retval;
@@ -257,6 +258,7 @@ char* strargv(char **cmd, bool with_quotes)
     }
 
     *dcmd = '\0';
+    LOG(INFO, "EXIT END: strargv");
 
     return retval;
 }
@@ -865,15 +867,18 @@ char *argvstr(const char *const*argv)
 
 char *strexread(const char *prog, const char *const*argv)
 {
+    LOG(info, "ENTRY TO: strexread");
     const char *ctx = strfmta("%s(%s, [%s]", __func__, prog ?: "", argvstra(argv) ?: "");
     char **args, *p, *q, c;
     int fd[2], pid, status, i, j, n;
     if (!prog || !argv) {
         LOGW("%s: invalid arguments (prog=%p, argv=%p)", ctx, prog, argv);
+        LOG(info, "Exit 1: strexread");
         return NULL;
     }
     if (pipe(fd) < 0) {
         LOGW("%s: failed to pipe(): %d (%s)", ctx, errno, strerror(errno));
+        LOG(info, "Exit 2: strexread");
         return NULL;
     }
     switch ((pid = fork())) {
@@ -881,6 +886,7 @@ char *strexread(const char *prog, const char *const*argv)
             LOGW("%s: failed to fork(): %d (%s)", ctx, errno, strerror(errno));
             close(fd[0]);
             close(fd[1]);
+            LOG(info, "Exit 3: strexread");
             return NULL;
         case 0:
             close(0);
@@ -922,9 +928,11 @@ char *strexread(const char *prog, const char *const*argv)
             if ((errno = (WIFEXITED(status) ? WEXITSTATUS(status) : -1)) == 0)
                 return p;
             free(p);
+            LOG(info, "EXIT 4: %s:%d:\n", __func__, __LINE__);
             return NULL;
     }
     LOGW("%s: unreachable", ctx);
+    LOG(info, "EXIT END: %s:%d:\n", __func__, __LINE__);
     return NULL;
 }
 
