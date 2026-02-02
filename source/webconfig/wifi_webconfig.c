@@ -230,13 +230,18 @@ webconfig_error_t webconfig_set(webconfig_t *config, webconfig_subdoc_data_t *da
 
 static webconfig_error_t translate_to_proto(webconfig_subdoc_type_t type, webconfig_subdoc_data_t *data)
 {
-#if defined EASY_MESH_NODE
-    return(translate_to_easymesh_tables(type, data));
-#elif ONEWIFI_OVSDB_TABLE_SUPPORT
-    return(translate_to_ovsdb_tables(type, data));
-#else
-    return webconfig_error_none;
-#endif
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "ENTRY TO: %s:%d:\n", __func__, __LINE__);
+    #if defined EASY_MESH_NODE
+        wifi_util_dbg_print(WIFI_WEBCONFIG, "%s:%d: Using EASY_MESH_NODE path\n", __func__, __LINE__);
+        return(translate_to_easymesh_tables(type, data));
+    #elif ONEWIFI_OVSDB_TABLE_SUPPORT
+        wifi_util_dbg_print(WIFI_WEBCONFIG, "%s:%d: Using ONEWIFI_OVSDB_TABLE_SUPPORT path\n", __func__, __LINE__);
+        return(translate_to_ovsdb_tables(type, data));
+    #else
+        wifi_util_dbg_print(WIFI_WEBCONFIG, "%s:%d: No specific support defined, returning none\n", __func__, __LINE__);
+        return webconfig_error_none;
+    #endif
 }
 
 static webconfig_error_t translate_from_proto(webconfig_subdoc_type_t type, webconfig_subdoc_data_t *data)
@@ -252,6 +257,8 @@ static webconfig_error_t translate_from_proto(webconfig_subdoc_type_t type, webc
 
 webconfig_error_t webconfig_init(webconfig_t *config)
 {
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "ENTRY TO: %s:%d:\n", __func__, __LINE__);
 
     if ((config->initializer <= webconfig_initializer_none) || (config->initializer >= webconfig_initializer_max)) {
         wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: initializer must be set to onewifi or dml or ovsdbmgr", __func__, __LINE__);
@@ -774,6 +781,8 @@ webconfig_error_t webconfig_init(webconfig_t *config)
 
     config->proto_desc.translate_to = translate_to_proto;
     config->proto_desc.translate_from = translate_from_proto;
+    wifi_util_info_print(WIFI_WEBCONFIG,
+            "EXIT END: %s:%d:\n", __func__, __LINE__);
 
     return webconfig_error_none;
 }
