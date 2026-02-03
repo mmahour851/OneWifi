@@ -2531,7 +2531,9 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_config_for_dml(webconfig_s
     }
 
     hal_cap = &decoded_params->hal_cap;
+    pthread_mutex_lock(&webconfig_data_lock);
     memcpy(&webconfig_ovsdb_data.u.decoded.hal_cap, hal_cap, sizeof(wifi_hal_capability_t));
+    pthread_mutex_unlock(&webconfig_data_lock);
 
     //Get the number of radios
     for (i = 0; i < decoded_params->num_radios; i++) {
@@ -2663,9 +2665,12 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_config_for_dml(webconfig_s
     row_count = (unsigned int *)&proto->vif_config_row_count;
     *row_count = count;
 
+    pthread_mutex_lock(&webconfig_data_lock);
     for (i = 0; i < decoded_params->num_radios; i++) {
         memcpy(&webconfig_ovsdb_data.u.decoded.radios[i].vaps, &decoded_params->radios[i].vaps, sizeof(rdk_wifi_vap_map_t));
     }
+    pthread_mutex_unlock(&webconfig_data_lock);
+
 
     return webconfig_error_none;
 }
@@ -4668,7 +4673,7 @@ webconfig_error_t translate_steerconfig_from_ovsdb_to_rdk(const struct schema_Ba
     st_cfg->stats_report_interval = config_row->stats_report_interval;
     st_cfg->success_threshold_secs = config_row->success_threshold_secs;
 
-    if ((config_row->if_name_2g != NULL) && (strlen(config_row->if_name_2g) != 0)) {
+    if (strlen(config_row->if_name_2g) != 0) {
         if (convert_ifname_to_vapname(wifi_prop, (char *)config_row->if_name_2g, (char *)st_cfg->vap_name_list[vap_name_list_len], sizeof(st_cfg->vap_name_list[vap_name_list_len])) != RETURN_OK) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: convert_ifname_to_vapname failed %s\n", __func__, __LINE__, config_row->if_name_2g);
             return webconfig_error_translate_from_ovsdb;
@@ -4676,7 +4681,7 @@ webconfig_error_t translate_steerconfig_from_ovsdb_to_rdk(const struct schema_Ba
         vap_name_list_len++;
     }
 
-    if ((config_row->if_name_5g != NULL) && (strlen(config_row->if_name_5g) != 0)) {
+    if (strlen(config_row->if_name_5g) != 0){
         if (convert_ifname_to_vapname(wifi_prop, (char *)config_row->if_name_5g, (char *)st_cfg->vap_name_list[vap_name_list_len], sizeof(st_cfg->vap_name_list[vap_name_list_len])) != RETURN_OK) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: convert_ifname_to_vapname failed %s\n", __func__, __LINE__, config_row->if_name_5g);
             return webconfig_error_translate_from_ovsdb;
@@ -4915,7 +4920,7 @@ webconfig_error_t translate_steeringclients_from_ovsdb_to_rdk(const struct schem
     char key[64] = {0};
     unsigned char id[64] = {0};
     int i = 0;
-    unsigned int out_bytes = 0;
+    int out_bytes = 0;
     if ((client_row == NULL) || (cli_cfg == NULL)) {
         wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: input arguement is NULL\n", __func__, __LINE__);
         return webconfig_error_translate_from_ovsdb;
@@ -4972,12 +4977,12 @@ webconfig_error_t translate_steeringclients_from_ovsdb_to_rdk(const struct schem
     }
     for (i = 0; i < client_row->cs_params_len; i++) {
         out_bytes = snprintf(cli_cfg->cs_params[i].key, sizeof(cli_cfg->cs_params[i].key), "%s", client_row->cs_params_keys[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->cs_params[i].key))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->cs_params[i].key))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
         out_bytes = snprintf(cli_cfg->cs_params[i].value, sizeof(cli_cfg->cs_params[i].value), "%s", client_row->cs_params[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->cs_params[i].value))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->cs_params[i].value))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
@@ -4986,12 +4991,12 @@ webconfig_error_t translate_steeringclients_from_ovsdb_to_rdk(const struct schem
 
     for (i = 0; i < client_row->rrm_bcn_rpt_params_len; i++) {
         out_bytes = snprintf(cli_cfg->rrm_bcn_rpt_params[i].key, sizeof(cli_cfg->rrm_bcn_rpt_params[i].key), "%s", client_row->rrm_bcn_rpt_params_keys[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->rrm_bcn_rpt_params[i].key))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->rrm_bcn_rpt_params[i].key))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
         out_bytes = snprintf(cli_cfg->rrm_bcn_rpt_params[i].value, sizeof(cli_cfg->rrm_bcn_rpt_params[i].value), "%s", client_row->rrm_bcn_rpt_params[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->rrm_bcn_rpt_params[i].value))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->rrm_bcn_rpt_params[i].value))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
@@ -5000,12 +5005,12 @@ webconfig_error_t translate_steeringclients_from_ovsdb_to_rdk(const struct schem
 
     for (i = 0; i < client_row->sc_btm_params_len; i++) {
         out_bytes = snprintf(cli_cfg->sc_btm_params[i].key, sizeof(cli_cfg->sc_btm_params[i].key), "%s", client_row->sc_btm_params_keys[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->sc_btm_params[i].key))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->sc_btm_params[i].key))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
         out_bytes = snprintf(cli_cfg->sc_btm_params[i].value, sizeof(cli_cfg->sc_btm_params[i].value), "%s", client_row->sc_btm_params[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->sc_btm_params[i].value))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->sc_btm_params[i].value))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
@@ -5014,12 +5019,12 @@ webconfig_error_t translate_steeringclients_from_ovsdb_to_rdk(const struct schem
 
     for (i = 0; i < client_row->steering_btm_params_len; i++) {
         out_bytes = snprintf(cli_cfg->steering_btm_params[i].key, sizeof(cli_cfg->steering_btm_params[i].key), "%s", client_row->steering_btm_params_keys[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->steering_btm_params[i].key))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->steering_btm_params[i].key))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
         out_bytes = snprintf(cli_cfg->steering_btm_params[i].value, sizeof(cli_cfg->steering_btm_params[i].value), "%s", client_row->steering_btm_params[i]);
-        if ((out_bytes < 0) || (out_bytes >= sizeof(cli_cfg->steering_btm_params[i].value))) {
+        if ((out_bytes < 0) || (out_bytes >= (int)sizeof(cli_cfg->steering_btm_params[i].value))) {
             wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: snprintf error %d\n", __func__, __LINE__, out_bytes);
             return webconfig_error_translate_from_ovsdb;
         }
@@ -5471,7 +5476,7 @@ webconfig_error_t   translate_radio_object_to_ovsdb_radio_config_for_radio(webco
         presence_mask |= (1 << radio_index);
     }
     if (presence_mask != pow(2, decoded_params->num_radios) - 1) {
-        wifi_util_error_print(WIFI_WEBCONFIG, "%s:%d: Radio object not present %s\n", __func__, __LINE__, presence_mask);
+        wifi_util_error_print(WIFI_WEBCONFIG, "%s:%d: Radio object not present %u\n", __func__, __LINE__, presence_mask);
         return webconfig_error_invalid_subdoc;
     }
 
